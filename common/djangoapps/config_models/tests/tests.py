@@ -25,6 +25,11 @@ class ExampleConfig(ConfigurationModel):
     string_field = models.TextField()
     int_field = models.IntegerField(default=10)
 
+    def __unicode__(self):
+        return "ExampleConfig(enabled={}, string_field={}, int_field={})".format(
+            self.enabled, self.string_field, self.int_field
+        )
+
 
 @patch('config_models.models.cache')
 class ConfigurationModelTests(TestCase):
@@ -40,7 +45,7 @@ class ConfigurationModelTests(TestCase):
         ExampleConfig(changed_by=self.user).save()
         mock_cache.delete.assert_called_with(ExampleConfig.cache_key_name())
 
-    def test_cache_key_name(self, _mock_cache):
+    def test_cache_key_name(self, __):
         self.assertEquals(ExampleConfig.cache_key_name(), 'configuration/ExampleConfig/current')
 
     def test_no_config_empty_cache(self, mock_cache):
@@ -104,6 +109,53 @@ class ConfigurationModelTests(TestCase):
         self.assertEquals(2, ExampleConfig.objects.all().count())
 
 
+class ConfigurationModelEqualityTests(TestCase):
+
+    def setUp(self):
+        super(ConfigurationModelEqualityTests, self).setUp()
+        self.user = User()
+        self.user.save()
+
+    def test_equality(self):
+        config = ExampleConfig(changed_by=self.user, string_field='first')
+        config.cache_timeout = 0
+        config.save()
+
+        self.assertTrue(ExampleConfig.equal_to_existing_entry({"string_field": "first"}))
+        self.assertTrue(ExampleConfig.equal_to_existing_entry({"string_field": "first", "enabled": False}))
+        self.assertTrue(ExampleConfig.equal_to_existing_entry({"string_field": "first", "int_field": 10}))
+
+        self.assertFalse(ExampleConfig.equal_to_existing_entry({"string_field": "first", "enabled": True}))
+        self.assertFalse(ExampleConfig.equal_to_existing_entry({"string_field": "first", "int_field": 20}))
+        self.assertFalse(ExampleConfig.equal_to_existing_entry({"string_field": "second"}))
+
+        self.assertFalse(ExampleConfig.equal_to_existing_entry({}))
+
+    def test_equality_custom_fields_to_ignore(self):
+        config = ExampleConfig(changed_by=self.user, string_field='first')
+        config.cache_timeout = 0
+        config.save()
+
+        # id, change_date, and changed_by will all be different for a newly created entry
+        self.assertTrue(ExampleConfig.equal_to_existing_entry({"string_field": "first"}))
+        self.assertFalse(ExampleConfig.equal_to_existing_entry(
+            {"string_field": "first"}, fields_to_ignore=("change_date", "changed_by"))
+        )
+        self.assertFalse(ExampleConfig.equal_to_existing_entry(
+            {"string_field": "first"}, fields_to_ignore=("id", "changed_by"))
+        )
+        self.assertFalse(ExampleConfig.equal_to_existing_entry(
+            {"string_field": "first"}, fields_to_ignore=("change_date", "id"))
+        )
+
+        # Test the ability to ignore a different field ("int_field").
+        self.assertFalse(ExampleConfig.equal_to_existing_entry({"string_field": "first", "int_field": 20}))
+        self.assertTrue(ExampleConfig.equal_to_existing_entry(
+            {"string_field": "first", "int_field": 20},
+            fields_to_ignore=("id", "change_date", "changed_by", "int_field")
+        ))
+
+
 class ExampleKeyedConfig(ConfigurationModel):
     """
     Test model for testing ``ConfigurationModels`` with keyed configuration.
@@ -119,6 +171,11 @@ class ExampleKeyedConfig(ConfigurationModel):
 
     string_field = models.TextField()
     int_field = models.IntegerField(default=10)
+
+    def __unicode__(self):
+        return "ExampleKeyedConfig(enabled={}, left={}, right={}, string_field={}, int_field={})".format(
+            self.enabled, self.left, self.right, self.string_field, self.int_field
+        )
 
 
 @ddt.ddt
@@ -293,6 +350,52 @@ class KeyedConfigurationModelTests(TestCase):
         fake_result = [('a', 'b'), ('c', 'd')]
         mock_cache.get.return_value = fake_result
         self.assertEquals(ExampleKeyedConfig.key_values(), fake_result)
+
+
+class KeyedConfigurationModelEqualityTests(TestCase):
+
+    def setUp(self):
+        super(KeyedConfigurationModelEqualityTests, self).setUp()
+        self.user = User()
+        self.user.save()
+
+    def test_equality(self):
+        config1 = ExampleKeyedConfig(left='left_a', right='right_a', int_field=1, changed_by=self.user)
+        config1.cache_timeout = 0
+        config1.save()
+
+        config2 = ExampleKeyedConfig(left='left_b', right='right_b', int_field=2, changed_by=self.user, enabled=True)
+        config2.cache_timeout = 0
+        config2.save()
+
+        config3 = ExampleKeyedConfig(left='left_c', changed_by=self.user)
+        config3.cache_timeout = 0
+        config3.save()
+
+        self.assertTrue(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_a", "right": "right_a", "int_field": 1})
+        )
+        self.assertTrue(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_b", "right": "right_b", "int_field": 2, "enabled": True})
+        )
+        self.assertTrue(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_c"})
+        )
+
+        self.assertFalse(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_a", "right": "right_a", "int_field": 1, "string_field": "foo"})
+        )
+        self.assertFalse(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_a", "int_field": 1})
+        )
+        self.assertFalse(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_b", "right": "right_b", "int_field": 2})
+        )
+        self.assertFalse(ExampleKeyedConfig.equal_to_existing_entry(
+            {"left": "left_c", "int_field": 11})
+        )
+
+        self.assertFalse(ExampleKeyedConfig.equal_to_existing_entry({}))
 
 
 @ddt.ddt

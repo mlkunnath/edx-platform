@@ -176,3 +176,46 @@ class ConfigurationModel(models.Model):
         values = list(cls.objects.values_list(*key_fields, flat=flat).order_by().distinct())
         cache.set(cache_key, values, cls.cache_timeout)
         return values
+
+    def fields_equal(self, instance, fields_to_ignore=("id", "change_date", "changed_by")):
+        """
+        Compares this instance's fields to the supplied instance to test for equality.
+        This will ignore any fields in `fields_to_ignore`.
+
+        Args:
+            instance: the model instance to compare
+            fields_to_ignore: List of fields that should not be compared for equality. By default
+            includes `id`, `change_date`, and `changed_by`.
+
+        Returns: True if the checked fields are all equivalent, else False
+        """
+        for field in self._meta.get_fields():
+            if field.name not in fields_to_ignore and getattr(instance, field.name) != getattr(self, field.name):
+                return False
+
+        return True
+
+    @classmethod
+    def equal_to_existing_entry(cls, json, fields_to_ignore=("id", "change_date", "changed_by")):
+        """
+        Compares this instance to a model instance constructed from the supplied JSON for equality.
+        This will ignore any fields in `fields_to_ignore`.
+
+        Note that this method cannot handle fields with many-to-many associations, as those can only
+        be set on a saved model instance (and saving the model instance will create a new entry).
+
+        Args:
+            json: json representing an entry to compare
+            fields_to_ignore: List of fields that should not be compared for equality. By default
+            includes `id`, `change_date`, and `changed_by`.
+
+        Returns: True if the checked fields are all equivalent, else False
+        """
+        new_instance = cls(**json)
+        key_field_args = tuple(getattr(new_instance, key) for key in cls.KEY_FIELDS)
+        current = cls.current(*key_field_args)
+        # If current.id is None, no entry actually existed and the "current" method created it.
+        if current.id is not None:
+            return current.fields_equal(new_instance, fields_to_ignore)
+
+        return False
