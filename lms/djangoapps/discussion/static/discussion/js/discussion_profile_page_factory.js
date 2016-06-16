@@ -1,7 +1,7 @@
 ;(function(define) {
     'use strict';
 
-    define(['jquery', 'DiscussionUserProfileView'],
+    define(['jquery', 'discussion/js/views/discussion_user_profile_view'],
         function($, DiscussionUserProfileView) {
             return function(options) {
                 var $element = options.$el,

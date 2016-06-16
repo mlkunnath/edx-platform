@@ -1,7 +1,7 @@
 define([
     'underscore', 'edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers', 'teams/js/views/team_discussion',
     'teams/js/spec_helpers/team_spec_helpers',
-    'xmodule_js/common_static/coffee/spec/discussion/discussion_spec_helper'
+    'DiscussionSpecHelper'
 ], function (_, AjaxHelpers, TeamDiscussionView, TeamSpecHelpers, DiscussionSpecHelper) {
     'use strict';
     xdescribe('TeamDiscussionView', function() {
