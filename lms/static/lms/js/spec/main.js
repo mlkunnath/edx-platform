@@ -54,7 +54,7 @@
             'mathjax': '//cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-MML-AM_SVG&delayStartupUntil=configured', // jshint ignore:line
             'youtube': '//www.youtube.com/player_api?noext',
             'coffee/src/ajax_prefix': 'xmodule_js/common_static/coffee/src/ajax_prefix',
-            'coffee/src/instructor_dashboard/student_admin': 'coffee/src/instructor_dashboard/student_admin',
+            'lms/src/instructor_dashboard/student_admin': 'lms/src/instructor_dashboard/student_admin',
             'xmodule_js/common_static/js/test/add_ajax_prefix': 'xmodule_js/common_static/js/test/add_ajax_prefix',
             'xblock/core': 'xmodule_js/common_static/js/xblock/core',
             'xblock/runtime.v1': 'xmodule_js/common_static/coffee/src/xblock/runtime.v1',
@@ -290,8 +290,8 @@
                 exports: 'AjaxPrefix',
                 deps: ['coffee/src/ajax_prefix']
             },
-            'coffee/src/instructor_dashboard/util': {
-                exports: 'coffee/src/instructor_dashboard/util',
+            'lms/src/instructor_dashboard/util': {
+                exports: 'InstructorDashboard.util',
                 deps: ['jquery', 'underscore', 'slick.core', 'slick.grid'],
                 init: function() {
                     // Set global variables that the util code is expecting to be defined
@@ -305,12 +305,10 @@
                     });
                 }
             },
-            'coffee/src/instructor_dashboard/student_admin': {
-                exports: 'coffee/src/instructor_dashboard/student_admin',
-                deps: ['jquery', 'underscore', 'coffee/src/instructor_dashboard/util', 'string_utils']
+            'lms/src/instructor_dashboard/student_admin': {
+                deps: ['jquery', 'underscore', 'lms/src/instructor_dashboard/util', 'string_utils']
             },
             'js/instructor_dashboard/certificates': {
-                exports: 'js/instructor_dashboard/certificates',
                 deps: ['jquery', 'gettext', 'underscore']
             },
             // LMS class loaded explicitly until they are converted to use RequireJS
@@ -682,6 +680,8 @@
     });
 
     var testFiles = [
+        'lms/js/spec/instructor_dashboard/membership_spec.js',
+        'lms/js/spec/instructor_dashboard/send_email_spec.js',
         'lms/js/spec/preview/preview_factory_spec.js',
         'js/spec/api_admin/catalog_preview_spec.js',
         'js/spec/courseware/bookmark_button_view_spec.js',

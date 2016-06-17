@@ -1,5 +1,5 @@
 /*global define */
-define(['jquery', 'coffee/src/instructor_dashboard/data_download', 'common/js/spec_helpers/ajax_helpers', 'slick.grid'],
+define(['jquery', 'lms/src/instructor_dashboard/data_download', 'common/js/spec_helpers/ajax_helpers', 'slick.grid'],
     function ($, DataDownload, AjaxHelpers) {
         'use strict';
         describe("edx.instructor_dashboard.data_download.DataDownload_Certificate", function() {

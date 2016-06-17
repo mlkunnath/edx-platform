@@ -1,6 +1,6 @@
-define(['jquery', 'coffee/src/instructor_dashboard/student_admin', 'common/js/spec_helpers/ajax_helpers'],
+define(['jquery', 'lms/src/instructor_dashboard/student_admin', 'common/js/spec_helpers/ajax_helpers'],
     function ($, StudentAdmin, AjaxHelpers) {
-        //'coffee/src/instructor_dashboard/student_admin'
+        //'lms/src/instructor_dashboard/student_admin'
         'use strict';
         describe("edx.instructor_dashboard.student_admin.StudentAdmin", function() {
             var studentadmin, dashboard_api_url, unique_student_identifier, alert_msg;
