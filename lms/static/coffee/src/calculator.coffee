@@ -53,19 +53,17 @@ class @Calculator
     isExpanded = false
     icon = 'fa-calculator'
 
-    $('div.calc-main').toggleClass 'open'
+    $('.calc-main').toggleClass 'open'
     if $calc.hasClass('closed')
       $calcWrapper
-        .find('input, a')
-        .attr 'tabindex', -1
+        .attr('aria-hidden', 'true')
     else
       text = gettext('Close Calculator')
       icon = 'fa-close'
       isExpanded = true
 
       $calcWrapper
-        .find('input, a')
-        .attr 'tabindex', 0
+        .attr('aria-hidden', 'false')
       # TODO: Investigate why doing this without the timeout causes it to jump
       # down to the bottom of the page. I suspect it's because it's putting the
       # focus on the text field before it transitions onto the page.
