@@ -69,4 +69,4 @@ class Command(BaseCommand):
         self.stdout.write(_("Importing JSON data from file {0}").format(json_file))
         with open(json_file) as data:
             created_entries = deserialize_json(data, options['username'])
-            self.stdout.write(_("Import complete, {0} new entries created".format(created_entries)))
+            self.stdout.write(_("Import complete, {0} new entries created").format(created_entries))

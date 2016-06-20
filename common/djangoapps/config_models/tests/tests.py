@@ -38,7 +38,7 @@ class ManyToManyExampleConfig(ConfigurationModel):
     cache_timeout = 300
 
     string_field = models.TextField()
-    many_user_field = models.ManyToManyField(User)
+    many_user_field = models.ManyToManyField(User, related_name='topic_many_user_field')
 
     def __unicode__(self):
         return "ManyToManyExampleConfig(enabled={}, string_field={})".format(self.enabled, self.string_field)
@@ -145,22 +145,24 @@ class ConfigurationModelTests(TestCase):
 
         # id, change_date, and changed_by will all be different for a newly created entry
         self.assertTrue(ExampleConfig.equal_to_current({"string_field": "first"}))
-        self.assertFalse(ExampleConfig.equal_to_current(
-            {"string_field": "first"}, fields_to_ignore=("change_date", "changed_by"))
+        self.assertFalse(
+            ExampleConfig.equal_to_current({"string_field": "first"}, fields_to_ignore=("change_date", "changed_by"))
         )
-        self.assertFalse(ExampleConfig.equal_to_current(
-            {"string_field": "first"}, fields_to_ignore=("id", "changed_by"))
+        self.assertFalse(
+            ExampleConfig.equal_to_current({"string_field": "first"}, fields_to_ignore=("id", "changed_by"))
         )
-        self.assertFalse(ExampleConfig.equal_to_current(
-            {"string_field": "first"}, fields_to_ignore=("change_date", "id"))
+        self.assertFalse(
+            ExampleConfig.equal_to_current({"string_field": "first"}, fields_to_ignore=("change_date", "id"))
         )
 
         # Test the ability to ignore a different field ("int_field").
         self.assertFalse(ExampleConfig.equal_to_current({"string_field": "first", "int_field": 20}))
-        self.assertTrue(ExampleConfig.equal_to_current(
-            {"string_field": "first", "int_field": 20},
-            fields_to_ignore=("id", "change_date", "changed_by", "int_field")
-        ))
+        self.assertTrue(
+            ExampleConfig.equal_to_current(
+                {"string_field": "first", "int_field": 20},
+                fields_to_ignore=("id", "change_date", "changed_by", "int_field")
+            )
+        )
 
     def test_equality_ignores_many_to_many(self, mock_cache):
         mock_cache.get.return_value = None
@@ -169,12 +171,12 @@ class ConfigurationModelTests(TestCase):
 
         second_user = User(username="second_user")
         second_user.save()
-        config.many_user_field.add(second_user)
+        config.many_user_field.add(second_user)  # pylint: disable=no-member
         config.save()
 
         # The many-to-many field is ignored in comparison.
-        self.assertTrue(ManyToManyExampleConfig.equal_to_current(
-            {"string_field": "first", "many_user_field": "removed"})
+        self.assertTrue(
+            ManyToManyExampleConfig.equal_to_current({"string_field": "first", "many_user_field": "removed"})
         )
 
 
@@ -385,27 +387,29 @@ class KeyedConfigurationModelTests(TestCase):
         config3 = ExampleKeyedConfig(left='left_c', changed_by=self.user)
         config3.save()
 
-        self.assertTrue(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_a", "right": "right_a", "int_field": 1})
+        self.assertTrue(
+            ExampleKeyedConfig.equal_to_current({"left": "left_a", "right": "right_a", "int_field": 1})
         )
-        self.assertTrue(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_b", "right": "right_b", "int_field": 2, "enabled": True})
+        self.assertTrue(
+            ExampleKeyedConfig.equal_to_current({"left": "left_b", "right": "right_b", "int_field": 2, "enabled": True})
         )
-        self.assertTrue(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_c"})
+        self.assertTrue(
+            ExampleKeyedConfig.equal_to_current({"left": "left_c"})
         )
 
-        self.assertFalse(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_a", "right": "right_a", "int_field": 1, "string_field": "foo"})
+        self.assertFalse(
+            ExampleKeyedConfig.equal_to_current(
+                {"left": "left_a", "right": "right_a", "int_field": 1, "string_field": "foo"}
+            )
         )
-        self.assertFalse(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_a", "int_field": 1})
+        self.assertFalse(
+            ExampleKeyedConfig.equal_to_current({"left": "left_a", "int_field": 1})
         )
-        self.assertFalse(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_b", "right": "right_b", "int_field": 2})
+        self.assertFalse(
+            ExampleKeyedConfig.equal_to_current({"left": "left_b", "right": "right_b", "int_field": 2})
         )
-        self.assertFalse(ExampleKeyedConfig.equal_to_current(
-            {"left": "left_c", "int_field": 11})
+        self.assertFalse(
+            ExampleKeyedConfig.equal_to_current({"left": "left_c", "int_field": 11})
         )
 
         self.assertFalse(ExampleKeyedConfig.equal_to_current({}))
