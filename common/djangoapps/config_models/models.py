@@ -6,6 +6,9 @@ from django.contrib.auth.models import User
 from django.core.cache import caches, InvalidCacheBackendError
 from django.utils.translation import ugettext_lazy as _
 
+from rest_framework.utils import model_meta
+
+
 try:
     cache = caches['configuration']  # pylint: disable=invalid-name
 except InvalidCacheBackendError:
@@ -182,6 +185,8 @@ class ConfigurationModel(models.Model):
         Compares this instance's fields to the supplied instance to test for equality.
         This will ignore any fields in `fields_to_ignore`.
 
+        Note that this method ignores many-to-many fields.
+
         Args:
             instance: the model instance to compare
             fields_to_ignore: List of fields that should not be compared for equality. By default
@@ -190,19 +195,21 @@ class ConfigurationModel(models.Model):
         Returns: True if the checked fields are all equivalent, else False
         """
         for field in self._meta.get_fields():
-            if field.name not in fields_to_ignore and getattr(instance, field.name) != getattr(self, field.name):
-                return False
+            if not field.many_to_many and field.name not in fields_to_ignore:
+                if getattr(instance, field.name) != getattr(self, field.name):
+                    return False
 
         return True
 
     @classmethod
-    def equal_to_existing_entry(cls, json, fields_to_ignore=("id", "change_date", "changed_by")):
+    def equal_to_current(cls, json, fields_to_ignore=("id", "change_date", "changed_by")):
         """
-        Compares this instance to a model instance constructed from the supplied JSON for equality.
+        Compares for equality this instance to a model instance constructed from the supplied JSON.
         This will ignore any fields in `fields_to_ignore`.
 
         Note that this method cannot handle fields with many-to-many associations, as those can only
         be set on a saved model instance (and saving the model instance will create a new entry).
+        All many-to-many field entries will be removed before for the equality comparison is done.
 
         Args:
             json: json representing an entry to compare
@@ -211,6 +218,14 @@ class ConfigurationModel(models.Model):
 
         Returns: True if the checked fields are all equivalent, else False
         """
+
+        # Remove many-to-many relationships from json.
+        # They require an instance to be already saved.
+        info = model_meta.get_field_info(cls)
+        for field_name, relation_info in info.relations.items():
+            if relation_info.to_many and (field_name in json):
+                json.pop(field_name)
+
         new_instance = cls(**json)
         key_field_args = tuple(getattr(new_instance, key) for key in cls.KEY_FIELDS)
         current = cls.current(*key_field_args)

@@ -59,7 +59,7 @@ def deserialize_json(stream, username):
     if list_serializer.is_valid():
         model_class = serializer_class.Meta.model
         for data in reversed(list_serializer.validated_data):
-            if model_class.equal_to_existing_entry(data):
+            if model_class.equal_to_current(data):
                 list_serializer.validated_data.remove(data)
 
         entries_created = len(list_serializer.validated_data)
