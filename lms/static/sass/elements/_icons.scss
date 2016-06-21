@@ -1,11 +1,10 @@
-.verified-cert-icon {
+.transparent-cert-icon {
   @include float(left);
   @include margin-right($baseline*0.4);
 
   margin-top: ($baseline/4);
-  background: url('#{$static-path}/images/icon-sm-verified.png') no-repeat;
+  background: url('#{$static-path}/images/icon-cert-white.svg') no-repeat;
   background-position: -4px -5px;
-  background-color: palette(grayscale, white-t);
   width: 20px;
   height: 18px;
 }
