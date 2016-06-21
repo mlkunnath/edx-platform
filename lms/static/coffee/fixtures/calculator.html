@@ -1,5 +1,5 @@
 <div class="calc-main">
-    <button title="${_('Open Calculator')}" aria-controls="calculator_wrapper" aria-expanded="false" class="calc utility-control-button">
+    <button title="Open Calculator" aria-controls="calculator_wrapper" aria-expanded="false" class="calc utility-control-button">
         <span class="icon fa fa-calculator" aria-hidden="true"></span>
     </button>
     
@@ -8,7 +8,7 @@
             <div class="input-wrapper">
                 <input type="text" id="calculator_input" tabindex="-1" />
                 <div class="help-wrapper">
-                    <button type="button" id="calculator_hint" aria-haspopup="true">${_('Hints')</button>
+                    <button type="button" id="calculator_hint" aria-haspopup="true">Hints</button>
                     <ul id="calculator_input_help" class="help" data-calculator-hint="hint-integers" role="tooltip" aria-hidden="true">
                         <li class="hint-item" id="hint-moreinfo" tabindex="-1">
                             <p>
@@ -18,13 +18,13 @@
                                 </span>
                             </p>
                         </li>
-                        <li class="hint-item" id="hint-integers" tabindex="-1"><p><span class="bold">${_('Integers:')</span> ${_('2520')</p></li>
-                        <li class="hint-item" id="hint-decimals" tabindex="-1"><p><span class="bold">${_('Decimals:')</span> ${_('3.14 or .98')</p></li>
+                        <li class="hint-item" id="hint-integers" tabindex="-1"><p><span class="bold">Integers:</span> 2520</p></li>
+                        <li class="hint-item" id="hint-decimals" tabindex="-1"><p><span class="bold">Decimals:/span> 3.14 or .98</p></li>
                     </ul>
                 </div>
             </div>
-            <input id="calculator_button" type="submit" title="${_('Calculate')" value="=" />
-            <input type="text" id="calculator_output" readonly />
+            <input id="calculator_button" type="submit" title="Calculate" value="=" />
+            <input type="text" id="calculator_output" tabindex="-1" readonly />
         </form>
     </div>
 </div>
