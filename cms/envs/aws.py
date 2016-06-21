@@ -35,6 +35,7 @@ CONFIG_ROOT = path(os.environ.get('CONFIG_ROOT', ENV_ROOT))
 # prefix.
 CONFIG_PREFIX = SERVICE_VARIANT + "." if SERVICE_VARIANT else ""
 
+FEATURES['ENABLE_SPECIAL_EXAMS'] = True
 
 ############### ALWAYS THE SAME ################################
 

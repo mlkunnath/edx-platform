@@ -15,6 +15,9 @@ USE_I18N = True
 DEFAULT_TEMPLATE_ENGINE['OPTIONS']['debug'] = DEBUG
 HTTPS = 'off'
 
+# Special Exams, aka Timed and Proctored Exams
+FEATURES['ENABLE_SPECIAL_EXAMS'] = True
+
 ################################ LOGGERS ######################################
 
 import logging

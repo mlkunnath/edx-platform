@@ -19,6 +19,9 @@ PLATFORM_NAME = ENV_TOKENS.get('PLATFORM_NAME', 'Devstack')
 CELERY_ALWAYS_EAGER = True
 HTTPS = 'off'
 
+# Special Exams, aka Timed and Proctored Exams
+FEATURES['ENABLE_SPECIAL_EXAMS'] = True
+
 ################################ LOGGERS ######################################
 
 # Silence noisy logs
