@@ -697,19 +697,22 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
             course_codes=[self.course_code]
         )
 
-    def _assert_supplemented(self, actual, is_enrolled=False, is_enrollment_open=True):
+    def _assert_supplemented(self, actual, **kwargs):
         """DRY helper used to verify that program data is extended correctly."""
         course_overview = CourseOverview.get_from_id(self.course.id)  # pylint: disable=no-member
 
-        run_mode = factories.RunMode(
-            course_key=unicode(self.course.id),  # pylint: disable=no-member
-            course_url=reverse('course_root', args=[self.course.id]),  # pylint: disable=no-member
-            course_image_url=course_overview.course_image_url,
-            start_date=self.course.start.strftime(self.human_friendly_format),
-            end_date=self.course.end.strftime(self.human_friendly_format),
-            is_enrolled=is_enrolled,
-            is_enrollment_open=is_enrollment_open,
-            marketing_url='',
+        run_mode = dict(
+            factories.RunMode(
+                course_key=unicode(self.course.id),  # pylint: disable=no-member
+                course_url=reverse('course_root', args=[self.course.id]),  # pylint: disable=no-member
+                course_image_url=course_overview.course_image_url,
+                start_date=self.course.start.strftime(self.human_friendly_format),
+                end_date=self.course.end.strftime(self.human_friendly_format),
+                is_enrolled=is_enrolled,
+                is_enrollment_open=is_enrollment_open,
+                marketing_url='',
+            ),
+            **kwargs
         )
         course_code = factories.CourseCode(display_name=self.course_code['display_name'], run_modes=[run_mode])
         expected = copy.deepcopy(self.program)
@@ -740,4 +743,14 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
 
         data = utils.supplement_program_data(self.program, self.user)
 
+        self._assert_supplemented(data, is_enrollment_open=is_enrollment_open)
+
+    @mock.patch(UTILS_MODULE + '.certificate_api.certificate_downloadable_status')
+    def test_certificate_url_retrieval(self, mock_get_cert_data):
+        """Verify that the student's run mode certificate is included, when available."""
+        mock_get_cert_data.return_value = {'uuid': '123abc'}
+
+        data = utils.supplement_program_data(self.program, self.user)
+
+        # TODO: Use dictionary update, a la ProgramsApiConfigMixin.
         self._assert_supplemented(data, is_enrollment_open=is_enrollment_open)
