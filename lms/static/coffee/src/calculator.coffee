@@ -201,7 +201,6 @@ class @Calculator
 
   handleClickOnDocument: (e) ->
     @hideHint()
-    $('#calculator_output').removeClass('has-result')
 
   handleClickOnHintButton: (e) ->
     e.preventDefault()
@@ -209,11 +208,9 @@ class @Calculator
     if @hintPopup.hasClass 'shown'
       @hideHint()
       @hintButton.attr('aria-expanded', false)
-      $('#calculator_output').removeClass('has-result')
     else
       @showHint()
       @hintButton.attr('aria-expanded', true)
-      $('#calculator_output').removeClass('has-result')
       @activeHint.focus()
 
   handleClickOnHintPopup: (e) ->
