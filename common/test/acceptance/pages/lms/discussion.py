@@ -372,8 +372,9 @@ class DiscussionSortPreferencePage(CoursePage):
         """
         Return the text of option that is selected for sorting.
         """
-        options = self.q(css="body.discussion .forum-nav-sort-control option")
-        return options.filter(lambda el: el.is_selected())[0].get_attribute("value")
+        selected_value = self.browser.execute_script(
+                'var selected_value = $(".forum-nav-sort-control").val(); return selected_value')
+        return selected_value
 
     def change_sort_preference(self, sort_by):
         """
