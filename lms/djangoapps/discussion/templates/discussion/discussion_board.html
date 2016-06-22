@@ -34,7 +34,14 @@ dump_js_escaped_json, js_escaped_string
 <%static:require_module module_name="discussion/js/discussion_board_factory" class_name="DiscussionBoardFactory">
 DiscussionBoardFactory({
     courseId: '${unicode(course.id) | n, js_escaped_string}',
-    $el: $(".discussion-board")
+    $el: $(".discussion-board"),
+    user_info: '${user_info | n, js_escaped_string}",
+    sort_preference: '${sort_preference | n, js_escaped_string}',
+    threads: '${threads | n, js_escaped_string}',
+    thread_pages: '${thread_pages | n, js_escaped_string}',
+    content_info: '${annotated_content_info | n, js_escaped_string}',
+    course_name: '${course.display_name_with_default | n, js_escaped_string}'
+    course_settings: '${course_settings | n, js_escaped_string}'
 });
 </%static:require_module>
 </%block>
@@ -45,18 +52,12 @@ DiscussionBoardFactory({
 <section class="discussion discussion-board container" id="discussion-container"
          data-roles="${roles}"
          data-course-id="${course_id}"
-         data-course-name="${course.display_name_with_default}"
-         data-user-info="${user_info}"
          data-user-create-comment="${can_create_comment}"
          data-user-create-subcomment="${can_create_subcomment}"
          data-read-only="false"
-         data-threads="${threads}"
-         data-thread-pages="${thread_pages}"
-         data-content-info="${annotated_content_info}"
          data-sort-preference="${sort_preference}"
          data-flag-moderator="${flag_moderator}"
          data-user-cohort-id="${user_cohort}"
-         data-course-settings="${course_settings}">
     <header class="page-header has-secondary">
         <div class="page-header-main">
             <div class="sr-is-focusable" tabindex="-1"></div>

@@ -5,23 +5,23 @@
         function($, Backbone) {
             return function(options) {
                 var $element = options.$el,
-                    userInfo = $element.data('user-info'),
-                    sortPreference = $element.data('sort-preference'),
-                    threads = $element.data('threads'),
-                    threadPages = $element.data('thread-pages'),
-                    contentInfo = $element.data('content-info'),
+                    userInfo = options.user_info,
+                    sortPreference = options.sort_preference,
+                    threads = options.threads,
+                    threadPages = options.thread_pages,
+                    contentInfo = options.content_info,
                     user = new window.DiscussionUser(userInfo),
                     discussion,
                     courseSettings;
                 // TODO: Perhaps eliminate usage of global variables when possible
                 window.DiscussionUtil.loadRolesFromContainer();
                 window.$$course_id = options.courseId;
-                window.courseName = $element.data('course-name');
+                window.courseName = options.course_name;
                 window.DiscussionUtil.setUser(user);
                 window.user = user;
                 window.Content.loadContentInfos(contentInfo);
                 discussion = new window.Discussion(threads, {pages: threadPages, sort: sortPreference});
-                courseSettings = new window.DiscussionCourseSettings($element.data('course-settings'));
+                courseSettings = new window.DiscussionCourseSettings(options.course_settings);
                 // jshint nonew:false
                 new window.DiscussionRouter({
                     discussion: discussion,
