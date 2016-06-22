@@ -4,16 +4,14 @@
 <div id="sequence_${element_id}" class="sequence" data-id="${item_id}" data-position="${position}" data-ajax-url="${ajax_url}" data-next-url="${next_url}" data-prev-url="${prev_url}">
   <div class="path"></div>
     % if masquerade_override:
-    <div class="pattern-library-shim">
-      <div class="alert alert-information subsection-header" role="alert" tabindex="-1">
-        <span class="icon alert-icon icon-bullhorn" aria-hidden="true"></span>
-        <div class="alert-message">
-          <p class="alert-copy">
+      <div class="pattern-library-shim alert alert-information subsection-header" role="alert" tabindex="-1">
+        <span class="pattern-library-shim icon alert-icon icon-bullhorn" aria-hidden="true"></span>
+        <div class="pattern-library-shim alert-message">
+          <p class="pattern-library-shim alert-copy">
             ${_("This exam is hidden from the learner.")}
           </p>
         </div>
       </div>
-    </div>
     % endif
   <div class="sequence-nav">
     <button class="sequence-nav-button button-previous">
