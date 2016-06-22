@@ -19,6 +19,7 @@ import json
 import logging
 from pytz import UTC
 from urllib import urlencode
+import time
 import uuid
 
 import analytics
@@ -73,6 +74,8 @@ UNENROLLED_TO_ENROLLED = 'from unenrolled to enrolled'
 ALLOWEDTOENROLL_TO_UNENROLLED = 'from allowed to enroll to enrolled'
 UNENROLLED_TO_UNENROLLED = 'from unenrolled to unenrolled'
 DEFAULT_TRANSITION_STATE = 'N/A'
+MAX_RETRIES = 3
+COEFFICIENT = .15
 
 TRANSITION_STATES = (
     (UNENROLLED_TO_ALLOWEDTOENROLL, UNENROLLED_TO_ALLOWEDTOENROLL),
@@ -1002,7 +1005,6 @@ class CourseEnrollment(models.Model):
         ).format(self.user, self.course_id, self.created, self.is_active)
 
     @classmethod
-    @transaction.atomic
     def get_or_create_enrollment(cls, user, course_key):
         """
         Create an enrollment for a user in a class. By default *this enrollment
@@ -1030,32 +1032,37 @@ class CourseEnrollment(models.Model):
         if user.id is None:
             user.save()
 
-        try:
-            enrollment, created = cls.objects.get_or_create(
-                user=user,
-                course_id=course_key,
-            )
+        # Even with MySQL set to use the READ COMMITTED isolation level, get_or_create sometimes
+        # raises an IntegrityError and the object in question doesn't appear in a subsequent get()
+        # call. Paired with non_atomic_requests, the retry logic here is meant to prevent IntegrityErrors
+        # from causing authenticated requests to fail.
+        retry = 0
+        while True:
+            # Exponential backoff. Keep sleep time short to prevent running out of available workers.
+            countdown = 2 ** retry * COEFFICIENT
 
-            # If we *did* just create a new enrollment, set some defaults
-            if created:
-                enrollment.mode = CourseMode.DEFAULT_MODE_SLUG
-                enrollment.is_active = False
-                enrollment.save()
+            try:
+                log.info('Attempting to get or create enrollment for user [%s]. This is retry [%d].', user.username,
+                         retry)
+                enrollment, __ = cls.objects.get_or_create(
+                    user=user,
+                    course_id=course_key,
+                    defaults={
+                        'mode': CourseMode.DEFAULT_MODE_SLUG,
+                        'is_active': False
+                    }
+                )
 
-        except IntegrityError:
-            log.info(
-                (
-                    "An integrity error occurred while getting-or-creating the enrollment"
-                    "for course key %s and student %s. This can occur if two processes try to get-or-create "
-                    "the enrollment at the same time and the database is set to REPEATABLE READ. We will try "
-                    "committing the transaction and retrying."
-                ),
-                course_key, user
-            )
-            enrollment = cls.objects.get(
-                user=user,
-                course_id=course_key,
-            )
+            except IntegrityError:
+                retry += 1
+                if retry <= MAX_RETRIES:
+                    log.warning('Failed to get or create enrollment for user [%s]. Sleeping for [%.2f] seconds.',
+                                user.username, countdown)
+                    time.sleep(countdown)
+                else:
+                    raise
+            else:
+                break
 
         return enrollment
 
