@@ -14,6 +14,7 @@
 class @Calculator
   constructor: ->
     @hintButton = $('#calculator_hint')
+    @calcInput = $('#calculator_input')
     @hintPopup = $('.help')
     @hintsList = @hintPopup.find('.hint-item')
     @selectHint($('#' + @hintPopup.attr('data-calculator-hint')));
@@ -21,6 +22,7 @@ class @Calculator
     $('.calc').click @toggle
     $('form#calculator').submit(@calculate).submit (e) ->
       e.preventDefault()
+
     @hintButton
       .click(($.proxy(@handleClickOnHintButton, @)))
 
@@ -34,6 +36,9 @@ class @Calculator
       .keyup($.proxy(@handleKeyUpOnHint, @))
 
     @handleClickOnDocument = $.proxy(@handleClickOnDocument, @)
+    
+    @calcInput
+      .focus(($.proxy(@inputClickHandler, @)))
 
   KEY:
     TAB   : 9
@@ -51,7 +56,7 @@ class @Calculator
     $calcWrapper = $('#calculator_wrapper')
     text = gettext('Open Calculator')
     isExpanded = false
-    icon = 'fa-calculator'
+    icon = 'fa-calculator'    
 
     $('.calc-main').toggleClass 'open'
     if $calc.hasClass('closed')
@@ -82,12 +87,16 @@ class @Calculator
       .addClass(icon)
 
     $calc.toggleClass 'closed'
+    
+  inputClickHandler: ->
+    $('#calculator_output').removeClass('has-result')
 
   showHint: ->
     @hintPopup
       .addClass('shown')
       .attr('aria-hidden', false)
 
+    $('#calculator_output').removeClass('has-result')
 
     $(document).on('click', @handleClickOnDocument)
 
@@ -95,6 +104,8 @@ class @Calculator
     @hintPopup
       .removeClass('shown')
       .attr('aria-hidden', true)
+      
+    $('#calculator_output').removeClass('has-result')
 
     $(document).off('click', @handleClickOnDocument)
 
@@ -190,6 +201,7 @@ class @Calculator
 
   handleClickOnDocument: (e) ->
     @hideHint()
+    $('#calculator_output').removeClass('has-result')
 
   handleClickOnHintButton: (e) ->
     e.preventDefault()
@@ -197,9 +209,11 @@ class @Calculator
     if @hintPopup.hasClass 'shown'
       @hideHint()
       @hintButton.attr('aria-expanded', false)
+      $('#calculator_output').removeClass('has-result')
     else
       @showHint()
       @hintButton.attr('aria-expanded', true)
+      $('#calculator_output').removeClass('has-result')
       @activeHint.focus()
 
   handleClickOnHintPopup: (e) ->
@@ -209,4 +223,5 @@ class @Calculator
     $.getWithPrefix '/calculate', { equation: $('#calculator_input').val() }, (data) ->
       $('#calculator_output')
         .val(data.result)
+        .addClass('has-result')
         .focus()

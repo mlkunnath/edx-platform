@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
         <form id="calculator">
             <div class="input-wrapper">
                 <label for="calculator_input" class="label-calc-input sr">${_('Enter equation')}</label>
-                <input type="text" id="calculator_input" title="${_('Calculator Input Field')}" />
+                <input type="text" id="calculator_input" title="${_('Calculator Input Field')}" aria-describedby="calculator_output" />
                 
                 <div class="help-wrapper">
                     <p class="sr" id="hint-instructions">${_('Use the arrow keys to navigate the tips or use the tab key to return to the calculator')}</p>
