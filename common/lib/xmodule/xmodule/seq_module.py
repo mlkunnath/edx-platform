@@ -210,12 +210,14 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
         self._capture_basic_metrics()
 
         # Is this sequential part of a timed or proctored exam?
+        masquerading = context.get('specific_masquerade', False)
+        view_html = None
         if self.is_time_limited:
             view_html = self._time_limited_student_view(context)
 
-            # Do we have an alternate rendering
+            # Do we have an applicable alternate rendering
             # from the edx_proctoring subsystem?
-            if view_html:
+            if view_html and not masquerading:
                 fragment.add_content(view_html)
                 return fragment
 
@@ -249,6 +251,7 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
             'ajax_url': self.system.ajax_url,
             'next_url': context.get('next_url'),
             'prev_url': context.get('prev_url'),
+            'masquerade_override': masquerading and view_html is not None,
         }
 
         fragment.add_content(self.system.render_template("seq_module.html", params))

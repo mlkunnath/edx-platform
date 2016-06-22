@@ -289,11 +289,17 @@ class CoursewareIndex(View):
             language_preference = settings.LANGUAGE_CODE
         return language_preference
 
-    def _is_masquerading_as_student(self):
+    def _is_masquerading_as_student(self, require_specific=False):
         """
         Returns whether the current request is masquerading as a student.
+
+        If require_specific is True, the method will return False if the request is asking
+        for the generic student view, or True if masquerading as a specific student.
         """
-        return self.masquerade and self.masquerade.role == 'student'
+        student_masquerade = self.masquerade and self.masquerade.role == 'student'
+        if require_specific:
+            return student_masquerade and self.masquerade.user_name
+        return student_masquerade
 
     def _find_block(self, parent, url_name, block_type, min_depth=None):
         """
@@ -435,6 +441,10 @@ class CoursewareIndex(View):
             section_context = self._create_section_context(
                 table_of_contents['previous_of_active_section'],
                 table_of_contents['next_of_active_section'],
+            )
+            # sections can hide data that masquerading staff should see when debugging issues with specific students
+            section_context['specific_masquerade'] = (
+                self.is_staff and self._is_masquerading_as_student(require_specific=True)
             )
             courseware_context['fragment'] = self.section.render(STUDENT_VIEW, section_context)
 
