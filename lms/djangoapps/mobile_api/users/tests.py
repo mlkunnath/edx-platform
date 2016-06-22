@@ -11,7 +11,7 @@ import pytz
 from django.conf import settings
 from django.utils import timezone
 from django.template import defaultfilters
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 from milestones.tests.utils import MilestonesTestCaseMixin
 from xmodule.course_module import DEFAULT_START_DATE
 from xmodule.modulestore.tests.factories import ItemFactory, CourseFactory
@@ -85,7 +85,8 @@ class TestUserEnrollmentApi(UrlResetMixin, MobileAPITestCase, MobileAuthUserTest
     LAST_WEEK = datetime.datetime.now(pytz.UTC) - datetime.timedelta(days=7)
     ADVERTISED_START = "Spring 2016"
 
-    @patch.dict("django.conf.settings.FEATURES", {"ENABLE_DISCUSSION_SERVICE": True})
+    @patch.dict(settings.FEATURES, {"ENABLE_DISCUSSION_SERVICE": True, 'ENABLE_MKTG_SITE': True})
+    @override_settings(MKTG_URLS={'ROOT': 'dummy-root'})
     def setUp(self, *args, **kwargs):
         super(TestUserEnrollmentApi, self).setUp()
 

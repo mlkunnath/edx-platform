@@ -11,6 +11,7 @@ Test utilities for mobile API tests:
 """
 # pylint: disable=no-member
 from datetime import timedelta
+from django.test import override_settings
 
 from django.utils import timezone
 import ddt
@@ -202,6 +203,7 @@ class MobileCourseAccessTestMixin(MobileAPIMilestonesMixin):
         (None, False)
     )
     @ddt.unpack
+    @override_settings(MKTG_URLS={'ROOT': 'dummy-root'})
     def test_visible_to_staff_only_course(self, role, should_succeed):
         self.init_course_access()
         self.course.visible_to_staff_only = True
